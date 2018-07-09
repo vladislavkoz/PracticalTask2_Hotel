@@ -1,42 +1,30 @@
 package com.interlink.hotel.Reception;
 
-import com.interlink.hotel.Apartment.AcomodationType;
-import com.interlink.hotel.Apartment.Apartment;
-import com.interlink.hotel.Apartment.ApartmentStatus;
+import com.interlink.hotel.Apartment.*;
 import com.interlink.hotel.Client.Client;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Reception {
-    List<Apartment> freeApartments;
-    List<Apartment> apartments;
-    List<Client> clients;
+    int countOfApartments;
+    List<ApartmentEntity> apartments;
     Map<Client,List<Reservation>> reservationBook;
-    Map<AcomodationType,Integer> countsFreeApartments;
 
-    public Reception(List<Apartment> apartments, Map<Client, List<Reservation>> reservationBook) {
-        this.apartments = apartments;
+    public Reception( Map<Client, List<Reservation>> reservationBook) {
         this.reservationBook = reservationBook;
-        this.countsFreeApartments = setCountFreeApartments();
+        this.countOfApartments = 0;
     }
 
-    public List<Apartment> getApartments() {
+    public List<ApartmentEntity> getApartments() {
         return apartments;
     }
 
-    public List<Client> getClients() {
-        return clients;
-    }
-
-    public Map<AcomodationType,Integer> getCountsFreeApartments() {
-        return countsFreeApartments;
-    }
-
-    public void setClients(List<Client> clients) {
-        this.clients = clients;
-    }
-
-    public void setApartments(List<Apartment> apartments) {
+    public void addApartments(List<ApartmentEntity> apartments) {
+        for (ApartmentEntity apartment : apartments) {
+            apartment.setId(1 + countOfApartments++);
+        }
+        System.out.println(countOfApartments);
         this.apartments = apartments;
     }
 
@@ -48,34 +36,70 @@ public class Reception {
         this.reservationBook = reservationBook;
     }
 
-    public void addNewReservation(Client client,Reservation reservation){
-        if (!reservationBook.containsKey(client)){
-            this.reservationBook.put(client,new ArrayList<>(Arrays.asList(reservation)));
-        }else{
-            reservationBook.get(client).add(reservation);
+    private List<ApartmentEntity> getApartmentsByAcomodation(List<ApartmentEntity> apartments,AccommodationType accommodationType){
+        return apartments.stream()
+                .filter(apartmentEntity -> apartmentEntity.getAccommodationType() == accommodationType)
+                .collect(Collectors.toList());
+    }
+
+    private List<ApartmentEntity> getApartmentsbyComfortType(List<ApartmentEntity> apartments, ComfortType comfortType){
+        return apartments.stream()
+                .filter(apartmentEntity -> apartmentEntity.getComfortType() == comfortType)
+                .collect(Collectors.toList());
+    }
+
+    private List<ApartmentEntity> getReservedApartmentsByPeriod(Period period){
+        return this.reservationBook.values().stream()
+                .flatMap(Collection::stream)
+                .filter(reservation -> reservation.getPeriod().isIntersectWith(period))
+                .map(Reservation::getApartment)
+                .collect(Collectors.toList());
+    }
+
+    private boolean isValidReservation(Reservation reservation){
+        int reservedApartments =  getApartmentsbyComfortType(getApartmentsByAcomodation(getReservedApartmentsByPeriod(reservation.getPeriod()),reservation.getApartment().getAccommodationType()),reservation.getApartment().getComfortType()).size();
+        int totalApartments = getApartmentsbyComfortType(getApartmentsByAcomodation(this.apartments,reservation.getApartment().getAccommodationType()),reservation.getApartment().getComfortType()).size();
+        return totalApartments > reservedApartments;
+    }
+
+    public boolean makeReservation(Reservation reservation){
+        if (!isValidReservation(reservation)){
+            return false;
         }
-        countsFreeApartments.put(reservation.getApartments().getAcomodationType(),countsFreeApartments.get(reservation.getApartments().getAcomodationType()) - 1);
-    }
-
-    public void removeAllClientReservation(Client client){
-        reservationBook.remove(client);
-    }
-
-    public void removeSomeClientReservation(Client client, List<Reservation> reservations){
-        for (Reservation reservation : reservations){
-            reservationBook.get(client).remove(reservation);
+        if (reservationBook.get(reservation.getClient()) == null){
+            this.reservationBook.put(reservation.getClient(),new ArrayList<>(Collections.singletonList(reservation)));
         }
+
+        return true;
     }
 
-    public List<Apartment> getFreeApartments() {
-        return freeApartments;
+    private List<ApartmentEntity> getFreeApartmentsByPeriod(Period period) {
+        List<ApartmentEntity> totalApartments = new ArrayList<>(this.apartments);
+        List<ApartmentEntity> reservedApartments = getReservedApartmentsByPeriod(period);
+        totalApartments.removeAll(reservedApartments);
+        return totalApartments;
     }
 
-    private Map<AcomodationType,Integer> setCountFreeApartments(){
-        Map<AcomodationType,Integer> countFreeApartments = new HashMap<>();
-        for (Apartment apartment  : this.apartments) {
-            countFreeApartments.put(,0);
+    private List<ApartmentEntity> validateApartmentsByCriterion(List<ApartmentEntity>  apartmentsByPeriod,Criterion...criterions){
+        List<ApartmentEntity> apartments = new ArrayList<>(apartmentsByPeriod);
+        for (ApartmentEntity apartment : apartmentsByPeriod) {
+            if (!validateSomeApartment(apartment,criterions)){
+                apartments.remove(apartment);
+            }
         }
-        return countFreeApartments;
+        return apartments;
+    }
+
+    private boolean validateSomeApartment(ApartmentEntity apartment ,Criterion...criterions){
+        for (Criterion c: criterions) {
+            if (!c.validate(apartment)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public List<ApartmentEntity> getFreeApartments(Period period,Criterion...criterions){
+        return validateApartmentsByCriterion(getFreeApartmentsByPeriod(period),criterions);
     }
 }

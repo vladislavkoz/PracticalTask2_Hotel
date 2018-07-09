@@ -3,9 +3,8 @@ package com.interlink.hotel.Apartment;
 public class Apartment {
 
     private int number;
-    private boolean balconyRoom;
-    private AcomodationType acomodationType;
-    private ApartmentsType apartmentsType;
+    private AccommodationType accommodationType;
+    private ComfortType comfortType;
     private ApartmentStatus apartmentStatus;
 
     private Apartment() {
@@ -19,16 +18,12 @@ public class Apartment {
         return number;
     }
 
-    public boolean isBalconyRoom() {
-        return balconyRoom;
+    public AccommodationType getAccommodationType() {
+        return accommodationType;
     }
 
-    public AcomodationType getAcomodationType() {
-        return acomodationType;
-    }
-
-    public ApartmentsType getApartmentsType() {
-        return apartmentsType;
+    public ComfortType getComfortType() {
+        return comfortType;
     }
 
     public static ApartamentBuilder apartmentBuilder(){
@@ -40,18 +35,13 @@ public class Apartment {
         private ApartamentBuilder() {
         }
 
-        public ApartamentBuilder setAcomodationType(AcomodationType acomodationType){
-            Apartment.this.acomodationType = acomodationType;
+        public ApartamentBuilder setAcomodationType(AccommodationType accommodationType){
+            Apartment.this.accommodationType = accommodationType;
             return  this;
         }
 
-        public ApartamentBuilder setApartmentsType(ApartmentsType apartmentsType){
-            Apartment.this.apartmentsType = apartmentsType;
-            return this;
-        }
-
-        public ApartamentBuilder setBalconyRoom(boolean balconyRoom){
-            Apartment.this.balconyRoom = balconyRoom;
+        public ApartamentBuilder setComfortType(ComfortType comfortType){
+            Apartment.this.comfortType = comfortType;
             return this;
         }
 
@@ -74,9 +64,8 @@ public class Apartment {
     public String toString() {
         return "Apartment{" +
                 "number=" + number +
-                ", balconyRoom=" + balconyRoom +
-                ", acomodationType=" + acomodationType +
-                ", apartmentsType=" + apartmentsType +
+                ", accommodationType=" + accommodationType +
+                ", comfortType=" + comfortType +
                 '}';
     }
 }

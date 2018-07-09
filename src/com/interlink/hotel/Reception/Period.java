@@ -12,6 +12,11 @@ public class Period {
         this.endDate = endDate;
     }
 
+    public Period(LocalDate startDate) {
+        this.startDate = startDate;
+        this.endDate = startDate;
+    }
+
     public LocalDate getStartDate() {
         return startDate;
     }
@@ -34,5 +39,27 @@ public class Period {
                 "startDate=" + startDate +
                 ", endDate=" + endDate +
                 '}';
+    }
+
+    public boolean isIntersectWith(Period period) {
+        LocalDate mostLaterStart;
+        LocalDate mostEarlyEnd;
+        if (this.startDate.isAfter(period.getStartDate())) {
+            mostLaterStart = this.startDate;
+        } else {
+            mostLaterStart = period.getStartDate();
+        }
+        if (this.endDate.isBefore(period.getEndDate())){
+            mostEarlyEnd = this.endDate;
+        }else{
+            mostEarlyEnd = period.getEndDate();
+        }
+        if (mostLaterStart.isEqual(mostEarlyEnd)){
+            return true;
+        }
+        if (mostLaterStart.isBefore(mostEarlyEnd)){
+            return true;
+        }
+        return false;
     }
 }

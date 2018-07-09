@@ -1,29 +1,27 @@
 package com.interlink.hotel.Reception;
 
-import com.interlink.hotel.Apartment.Apartment;
+import com.interlink.hotel.Apartment.ApartmentEntity;
 import com.interlink.hotel.Client.Client;
 
-import java.util.List;
-import java.util.Objects;
 
 public class Reservation {
 
-    private int clientId;
-    private Apartment apartments;
+    private Client client;
+    private ApartmentEntity apartments;
     private Period period;
 
-    public Reservation(int clientId, Apartment apartments, Period period) {
-        this.clientId = clientId;
+    public Reservation(Client client, ApartmentEntity apartments, Period period) {
+        this.client = client;
         this.apartments = apartments;
         this.period = period;
     }
 
-    public int getClientId() {
-        return clientId;
+    public Client getClient() {
+        return client;
     }
 
-    public void setClientId(int clientId) {
-        this.clientId = clientId;
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     public Period getPeriod() {
@@ -34,33 +32,17 @@ public class Reservation {
         this.period = period;
     }
 
-    public Apartment getApartments() {
+    public ApartmentEntity getApartment() {
         return apartments;
     }
 
-    public void setApartments(Apartment apartments) {
+    public void setApartments(ApartmentEntity apartments) {
         this.apartments = apartments;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Reservation that = (Reservation) o;
-        return Objects.equals(apartments, that.apartments) &&
-                Objects.equals(period, that.period);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(apartments, period);
     }
 
     @Override
     public String toString() {
         return "Reservation{" +
-                "clientId=" + clientId +
                 ", apartments=" + apartments +
                 ", period=" + period +
                 '}';
